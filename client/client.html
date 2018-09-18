@@ -6,7 +6,58 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
+    const handleResponse = (xhr) => {
+        const content = document.querySelector('#content');
+        const pageSelect = document.querySelector('#page');
+        const type = xhr.getResponseHeader('content-type');
+        
+        if (type === 'application/json') {
+            const obj = JSON.parse(xhr.response);
+            
+            //h1.textContent = `${pageSelect.value}`;
+            //p.textContent = `${obj.message}`;
+            content.innerHTML = `<h1>${pageSelect.options[pageSelect.selectedIndex].text}</h1><p>Message: ${obj.message}</p>`;
+        }
+        else if (type === 'text/xml') {
+            const message = xhr.responseXML.querySelector('message').textContent;
+            
+            //h1.textContent = `${pageSelect.value}`;
+            //p.textContent = `${message}`;
+            content.innerHTML = `<h1>${pageSelect.options[pageSelect.selectedIndex].text}</h1><p>Message: ${message}</p>`;
+        }
+    };
 
+    const sendAjax = (url, acceptedType) => {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.open('GET', url);
+        
+        if (acceptedType === "text/xml") {
+            xhr.setRequestHeader('Accept', 'text/xml');
+        }
+        else {
+            xhr.setRequestHeader('Accept', 'application/json');
+        }
+        
+        xhr.onload = () => handleResponse(xhr);
+        
+        xhr.send();
+    };
+
+    const init = () => {
+        const sendButton = document.querySelector('#send');
+        const pageSelect = document.querySelector('#page');
+        const typeSelect = document.querySelector('#type');
+        
+        const page = () => sendAjax(pageSelect.value, typeSelect.value);
+        
+        sendButton.addEventListener('click', page);
+        
+        //console.log(pageSelect.value);
+        //console.log(typeSelect.value);
+    };
+
+    window.onload = init;
   </script>
 </head>
 <body>
